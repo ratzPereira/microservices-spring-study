@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+
+  accounts:
+    image: ratzbank-accounts:latest
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    networks:
+      - ratzbank-network
+    
+  loans:
+    image: ratzbank-loans:latest
+    mem_limit: 700m
+    ports:
+      - "8090:8090"
+    networks:
+      - ratzbank-network
+    
+  cards:
+    image: ratzbank-cards:latest
+    mem_limit: 700m
+    ports:
+      - "9000:9000"
+    networks:
+      - ratzbank-network
+    
+networks:
+  ratzbank-network:
