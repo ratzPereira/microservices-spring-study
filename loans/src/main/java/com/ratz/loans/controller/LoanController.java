@@ -8,16 +8,17 @@ import com.ratz.loans.entity.Customer;
 import com.ratz.loans.entity.Loans;
 import com.ratz.loans.entity.Properties;
 import com.ratz.loans.repository.LoansRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 public class LoanController {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoanController.class);
 
     @Autowired
     private LoansRepository repository;
@@ -26,10 +27,10 @@ public class LoanController {
     private LoansServiceConfig loansConfig;
 
     @PostMapping("/myLoans")
-    public List<Loans> getLoansDetails(@RequestBody Customer customer) {
-
+    public List<Loans> getLoansDetails(@RequestHeader("ratzbank-correlation-id") String correlationid, @RequestBody Customer customer) {
+        logger.info("getLoansDetails() method started");
         List<Loans> loans = repository.findByCustomerIdOrderByStartDtDesc(customer.getCustomerId());
-
+        logger.info("getLoansDetails() method ended");
         if (loans != null) {
             return loans;
         } else {
