@@ -10,6 +10,8 @@ import com.ratz.accounts.repository.AccountsRepository;
 import com.ratz.accounts.service.client.CardsFeignClient;
 import com.ratz.accounts.service.client.LoansFeignClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +59,8 @@ public class AccountsController {
     }
 
     @PostMapping("/myCustomerDetails")
-    @CircuitBreaker(name = "detailsForCustomerSupportApp",fallbackMethod ="myCustomerDetailsFallBack")
+    //@CircuitBreaker(name = "detailsForCustomerSupportApp",fallbackMethod ="myCustomerDetailsFallBack")
+    @Retry(name = "retryForCustomerDetails", fallbackMethod = "myCustomerDetailsFallBack")
     public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
 
         Accounts accounts = repository.findByCustomerId(customer.getCustomerId());
@@ -83,4 +86,13 @@ public class AccountsController {
 
     }
 
+    @GetMapping("/sayHello")
+    @RateLimiter(name = "sayHello", fallbackMethod = "sayHelloFallback")
+    public String sayHello() {
+        return "Hello, Welcome to RatzBank Main";
+    }
+
+    private String sayHelloFallback(Throwable t) {
+        return "Hi, Welcome to RatzBank";
+    }
 }
