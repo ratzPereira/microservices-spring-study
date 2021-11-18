@@ -10,7 +10,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=password
     networks:
-     - eazybank
+     - ratzbank
     depends_on:
       - prometheus  
 
@@ -21,36 +21,26 @@ services:
    volumes:
     - ./prometheus.yml:/etc/prometheus/prometheus.yml
    networks:
-    - eazybank
-   
-  zipkin:
-    image: openzipkin/zipkin
-    mem_limit: 700m
-    ports:
-      - "9411:9411"
-    networks:
-     - eazybank
+    - ratzbank
 
   configserver:
-    image: eazybytes/configserver:latest
+    image: ratzbank-configserver:latest
     mem_limit: 700m
     ports:
       - "8071:8071"
     networks:
-     - eazybank
-    depends_on:
-      - zipkin
+     - ratzbank
     environment:
       SPRING_PROFILES_ACTIVE: default
-      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+
       
   eurekaserver:
-    image: eazybytes/eurekaserver:latest
+    image: ratzbank-eurekaserver:latest
     mem_limit: 700m
     ports:
       - "8070:8070"
     networks:
-     - eazybank
+     - ratzbank
     depends_on:
       - configserver
     deploy:
@@ -62,15 +52,15 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
-      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+
 
   accounts:
-    image: eazybytes/accounts:latest
+    image: ratzbank-accounts:latest
     mem_limit: 700m
     ports:
-      - "8080:8080"
+      - "8081:8081"
     networks:
-      - eazybank
+      - ratzbank
     depends_on:
       - configserver
       - eurekaserver
@@ -84,15 +74,15 @@ services:
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+
   
   loans:
-    image: eazybytes/loans:latest
+    image: ratzbank-loans:latest
     mem_limit: 700m
     ports:
       - "8090:8090"
     networks:
-      - eazybank
+      - ratzbank
     depends_on:
       - configserver
       - eurekaserver
@@ -106,15 +96,15 @@ services:
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+
     
   cards:
-    image: eazybytes/cards:latest
+    image: ratzbank-cards:latest
     mem_limit: 700m
     ports:
       - "9000:9000"
     networks:
-      - eazybank
+      - ratzbank
     depends_on:
       - configserver
       - eurekaserver
@@ -128,15 +118,14 @@ services:
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
       
   gatewayserver:
-    image: eazybytes/gatewayserver:latest
+    image: ratzbank-gatewayserver:latest
     mem_limit: 700m
     ports:
       - "8072:8072"
     networks:
-      - eazybank
+      - ratzbank
     depends_on:
       - configserver
       - eurekaserver
@@ -153,7 +142,6 @@ services:
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
 
 networks:
-  eazybank:
+  ratzbank:
