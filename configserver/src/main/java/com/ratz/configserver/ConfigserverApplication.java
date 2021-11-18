@@ -7,7 +7,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 @SpringBootApplication
 @EnableConfigServer
-@RefreshScope
 public class ConfigserverApplication {
 
 	public static void main(String[] args) {
