@@ -9,6 +9,7 @@ import com.ratz.accounts.repository.AccountsRepository;
 
 import com.ratz.accounts.service.client.CardsFeignClient;
 import com.ratz.accounts.service.client.LoansFeignClient;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,7 @@ public class AccountsController {
     }
 
     @PostMapping("/myCustomerDetails")
+    @CircuitBreaker(name = "detailsForCustomerSupportApp",fallbackMethod ="myCustomerDetailsFallBack")
     public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
 
         Accounts accounts = repository.findByCustomerId(customer.getCustomerId());
@@ -67,6 +69,16 @@ public class AccountsController {
         customerDetails.setLoans(loans);
         customerDetails.setCards(cards);
 
+        return customerDetails;
+
+    }
+
+    private CustomerDetails myCustomerDetailsFallBack(Customer customer, Throwable t) {
+        Accounts accounts = repository.findByCustomerId(customer.getCustomerId());
+        List<Loans> loans = loansFeignClient.getLoansDetails(customer);
+        CustomerDetails customerDetails = new CustomerDetails();
+        customerDetails.setAccounts(accounts);
+        customerDetails.setLoans(loans);
         return customerDetails;
 
     }
